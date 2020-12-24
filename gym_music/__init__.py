@@ -9,4 +9,3 @@ register(
     entry_point='gym_music.envs:MusicFuturesEnv',
 )
 
-from .music_player.midi_music_player import MidiMusicPlayer
