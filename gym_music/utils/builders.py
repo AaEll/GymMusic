@@ -18,6 +18,9 @@ class MidiBuilder():
   def reset(self):
     self.token_sequence = []
     #self.midi_idx = 0
+
+  def close(self):
+    pass
   
   def build(self, midi_path = None):
     if midi_path is None:
