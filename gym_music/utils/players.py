@@ -1,12 +1,25 @@
-from .vlc_player import VLC_Player
-from .midi_builder import MidiBuilder
 
-class MIDI_Player(VLC_Player):
+
+class Player():
+
+  def __init__(self):
+    pass
+  
+  def run(self):
+    pass
+
+  def play(self, content_path):
+    pass
+
+  def close(self):
+    pass
+  
+
+
+class MIDI_Player(Player):
 
   def __init__(self):
     super(MIDI_Player, self).__init__()
-    self.instance = vlc.Instance
-    self.midi_builder = MidiBuilder()
 
 
 

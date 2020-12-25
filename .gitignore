@@ -1,3 +1,4 @@
 build/
+dist/
 output/
 gym_music.egg-info/
