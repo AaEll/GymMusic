@@ -10,7 +10,7 @@ class MusicEnv(gym.Env):
   metadata = {'render.modes': ['human']}
 
   def __init__(self, max_rounds = 10):
-    super(MidiEnv,self).__init__()
+    super(MusicEnv,self).__init__()
     self.action_space = spaces.MultiDiscrete([2]*10)
     self.observation_space = spaces.Discrete(2)
     
@@ -27,7 +27,7 @@ class MusicEnv(gym.Env):
 
     self._proto_rounds = self._proto_rounds + 1
 
-    if self.is_stop_action(action):
+    if self._is_stop_action(action):
       self.builder.append(action)
       midi_file_path = self.builder.build()
       self.player.queue(midi_file_path)
@@ -58,7 +58,7 @@ class MusicEnv(gym.Env):
     self.player.close()
     pass
 
-  def _is_stop_action(action):
+  def _is_stop_action(self,action):
     return self._proto_rounds >= self.max_proto_rounds
     
 
