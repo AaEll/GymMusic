@@ -10,6 +10,9 @@ class Player():
 
   def close(self):
     pass
+
+  def reset(self):
+    pass
   
 
 
@@ -27,6 +30,9 @@ class MIDI_Player(Player):
       pygame.mixer.music.load(content_path)
       pygame.mixer.music.play()
 
+  def reset(self):
+    pygame.mixer.quit()
+    pygame.mixer.init()
 
   def close(self):
     pygame.mixer.quit()
