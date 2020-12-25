@@ -1,4 +1,5 @@
-from .midi_utils import event_indices_to_midi_file 
+from . import midi_utils 
+import numpy as np 
 
 class MidiBuilder():
   """
@@ -25,7 +26,8 @@ class MidiBuilder():
   def build(self, midi_path = None):
     if midi_path is None:
         midi_path = "./output/tmp/midi_{}_{}.mid".format(self.builder_idx, self.midi_idx)
-    midi_utils.event_indices_to_midi_file(self.proto_sequence, midi_path)
+    cat_sequence = np.concatenate(self.proto_sequence,axis = 0)
+    midi_utils.event_indices_to_midi_file(cat_sequence, midi_path)
     self.midi_idx = self.midi_idx + 1
     
     return midi_path
