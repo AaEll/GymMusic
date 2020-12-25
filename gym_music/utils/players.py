@@ -16,10 +16,10 @@ class Player():
   
 
 
-class MIDI_Player(Player):
+class MidiPlayer(Player):
 
   def __init__(self):
-    super(MIDI_Player, self).__init__()
+    super(MidiPlayer, self).__init__()
     pygame.mixer.init()
 
   def queue(self,content_path):
