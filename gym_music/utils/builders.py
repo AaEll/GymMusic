@@ -1,9 +1,4 @@
-import note_seq
-from note_seq.protobuf import generator_pb2
-from note_seq.protobuf import music_pb2
-
-def idx_to_proto_token(idx):
-    pass
+from .midi_utils import event_indices_to_midi_file 
 
 class MidiBuilder():
   """
@@ -11,20 +6,27 @@ class MidiBuilder():
   appends of token indices
   """
 
-  def __init__(self):
-    self.token_sequence = []
-    self.idx_to_token = idx_to_proto_token
+  def __init__(self, builder_idx = 0):
+    self.proto_sequence = []
+    self.builder_idx = builder_idx
+    self.midi_idx = 0
+
     
-  def append(self, output_idx):
-    next_token = self.idx_to_token(output_idx)
-    self.proto_sequence.append(next_token)
+  def append(self, next_proto):
+    self.proto_sequence.append(next_proto)
     
   def reset(self):
     self.token_sequence = []
+    #self.midi_idx = 0
   
-  def build(self, midi_path):
-    note_seq.sequence_proto_to_midi_file(self.token_sequence, midi_path)
+  def build(self, midi_path = None):
+    if midi_path is None:
+        midi_path = "./output/tmp/midi_{}_{}.mid".format(self.builder_idx, self.midi_idx)
+    midi_utils.event_indices_to_midi_file(self.proto_sequence, midi_path)
+    self.midi_idx = self.midi_idx + 1
+    
     return midi_path
+
 
 
 
