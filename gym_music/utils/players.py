@@ -1,7 +1,5 @@
-
-import asyncio
-
-
+import subprocess
+import os
 class Player():
 
   def __init__(self):
@@ -15,50 +13,32 @@ class Player():
 
   def reset(self):
     pass
-  
-async def run_subprocess(cmd):
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE)
-
-    stdout, stderr = await proc.communicate()
-    
-    
-    print(f'[{cmd!r} exited with {proc.returncode}]')
-    if stdout:
-        print(f'[stdout]\n{stdout.decode()}')
-    if stderr:
-        print(f'[stderr]\n{stderr.decode()}')
-    
-    return proc, stdout, stderr
 
 class MidiPlayer(Player):
-  open_audio_cmd = "fluidsynth -i -a pulseaudio /usr/share/sounds/sf2/FluidR3_GM.sf2 {}"
+  
   def __init__(self):
     super(MidiPlayer, self).__init__()
-    self._lock = asyncio.Semaphore(1)
-    self._loop = asyncio.get_event_loop()
+    self._p = None
+    self.soundfont_path = '/usr/share/sounds/sf2/FluidR3_GM.sf2'
+
+    self.env = os.environ.copy()
+    self.env["PATH"] = '/usr/local/bin:'+self.env["PATH"]
 
   def queue(self,content_path):
-    print("queue-ing task")
-
-    asyncio.run(run_subprocess(self.open_audio_cmd.format(content_path)))
-    #task = self._loop.create_task(self._queue(content_path))
-
+    if self.is_running():
+      self._p.wait(30) # give the current audio 30s to complete
+    
+    self._p = subprocess.Popen(["fluidsynth",'-i','-a','pulseaudio',self.soundfont_path,content_path],env = self.env)
+    
+    
 
   def reset(self):
     pass
   def close(self):
     pass
   
-  @asyncio.coroutine
-  def _queue(self,content_path):
-    print('entered queue')
-    with(self._lock):
-      print('aquired lock!')
-      # create music process and await for it to finish
-      _ = asyncio.run_until_complete(run_subprocess(self.open_audio_cmd.format(content_path)))
-
-
-
+  def is_running(self):
+    if self._p is None:
+      return False
+    else:
+      return self._p.poll() is None
