@@ -28,14 +28,13 @@ if __name__ == "__main__":
 
     agent = RandomAgent(Discrete(len(actions)))
 
-    for i in range(10):
+    for i in range(3):
       env.reset()
       obs,reward,done = (0,0,0)
-    
+      
       while True:
         action_idx = agent.act(obs, reward, done)
         action = actions[action_idx]
         obs, reward, done, _ = env.step(action)
         if done:
           break
-  

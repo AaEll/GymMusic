@@ -1,7 +1,6 @@
-import pygame
+import subprocesses
 
 class Player():
-
   def __init__(self):
     pass
 
@@ -17,26 +16,21 @@ class Player():
 
 
 class MidiPlayer(Player):
-
   def __init__(self):
     super(MidiPlayer, self).__init__()
-    pygame.mixer.init()
+    self.soundfont = '/usr/share/sounds/sf2/FluidR3_GM.sf2'
+    self.samplerate = '44100'
 
   def queue(self,content_path):
+    subprocess.call(['fluidsynth', '-i','-a','pulseaudio', self.soundfont, content_path,'-r',self.samplerate],shell=False)
 
-    if pygame.mixer.music.get_busy(): # if currently playing music
-      pygame.mixer.music.queue(content_path)
-    else:
-      pygame.mixer.music.load(content_path)
-      pygame.mixer.music.play()
+
 
   def reset(self):
-    pygame.mixer.quit()
-    pygame.mixer.init()
+    pass
 
   def close(self):
-    pygame.mixer.quit()
-
+    pass
 
 
 

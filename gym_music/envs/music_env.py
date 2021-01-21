@@ -31,7 +31,6 @@ class MusicEnv(gym.Env):
       self.builder.append(action)
       midi_file_path = self.builder.build()
       self.player.queue(midi_file_path)
-
       #reward = self.player.wait(song_id)
       reward = 1
       obs = 1
@@ -46,6 +45,7 @@ class MusicEnv(gym.Env):
     return obs,reward,done, {}
 
   def reset(self):
+    self._proto_rounds = 0
     self.builder.reset()
     self.player.reset()
     return None
