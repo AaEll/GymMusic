@@ -1,5 +1,6 @@
 from . import midi_utils 
 import numpy as np 
+import random 
 
 class MidiBuilder():
   """
@@ -7,9 +8,12 @@ class MidiBuilder():
   appends of token indices
   """
 
-  def __init__(self, builder_idx = 0):
+  def __init__(self,builder_idx = None):
     self.proto_sequence = []
-    self.builder_idx = builder_idx
+    if builder_idx is None:
+        self.builder_idx = random.randint(0,1000)
+    else:
+        self.builder_idx = builder_idx
     self.midi_idx = 0
 
     
@@ -18,7 +22,7 @@ class MidiBuilder():
     
   def reset(self):
     self.token_sequence = []
-    #self.midi_idx = 0
+    self.midi_idx = 0
 
   def close(self):
     pass
