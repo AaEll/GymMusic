@@ -1,6 +1,7 @@
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
+import asyncio
 
 from ..utils.builders import MidiBuilder
 from ..utils.players import MidiPlayer
@@ -9,14 +10,15 @@ from ..utils.players import MidiPlayer
 class MusicEnv(gym.Env):
   metadata = {'render.modes': ['human']}
 
-  def __init__(self, max_rounds = 10):
-    super(MusicEnv,self).__init__()
+  def __init__(self, max_rounds = 30, builder = None, player = None, monitor = None):
+    super().__init__()
     self.action_space = spaces.MultiDiscrete([2]*10)
     self.observation_space = spaces.Discrete(2)
     
     # define Midi utility objects
-    self.builder = MidiBuilder()
-    self.player = MidiPlayer()
+
+    self.builder = MidiBuilder() if builder is None else builder
+    self.player = MidiPlayer(monitor = monitor) if player is None else player
 
     # stop condition number of rounds
     self._proto_rounds = 0
@@ -30,9 +32,8 @@ class MusicEnv(gym.Env):
     if self._is_stop_action(action):
       self.builder.append(action)
       midi_file_path = self.builder.build()
-      self.player.queue(midi_file_path)
-      #reward = self.player.wait(song_id)
-      reward = 1
+      reward = self.player.queue(midi_file_path)
+      reward = reward.result() if asyncio.isfuture(reward) else reward 
       obs = 1
       done = 1
 
@@ -48,7 +49,7 @@ class MusicEnv(gym.Env):
     self._proto_rounds = 0
     self.builder.reset()
     self.player.reset()
-    return None
+    
   
   def render(self, mode='human',):
     pass
@@ -56,7 +57,7 @@ class MusicEnv(gym.Env):
   def close(self):
     self.builder.close()
     self.player.close()
-    pass
+    
 
   def _is_stop_action(self,action):
     return self._proto_rounds >= self.max_proto_rounds
