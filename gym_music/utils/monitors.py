@@ -26,6 +26,9 @@ class HeartMonitor(Monitor):
     self._uuid = None
 
     # initialize HR monitor 
+    self.gat_p = None
+    self._handle = None
+    self._uuid = None
     self.connect()
 
     self.rounds = 30
@@ -59,8 +62,8 @@ class HeartMonitor(Monitor):
     self._close_p()
 
   def _close_p(self):
-    if self._p is not None:
-      self._p.terminate()
+    if self.gat_p is not None:
+      self.gat_p.terminate()
  
   def getHeartRate(message):
 
