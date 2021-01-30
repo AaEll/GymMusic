@@ -91,7 +91,7 @@ class HeartMonitor(Monitor):
       except pexcpect.TIMEOUT:
           print('registration failed : retrying')
       except KeyboardInterrupt:
-        self.gat_P.close()
+        self.gat_p.close()
         quit()
       self._handle = self.gat_p.match.group(1).decode()
       self._uuid = self.gat_p.match.group(2).decode()
@@ -99,6 +99,21 @@ class HeartMonitor(Monitor):
 
 
   def read_hr():
-    pass 
+    try:
+      self.gat_p.expect('Notification handle = ' + self._handle + 'value: ([0-9a-f]+)', timeout = 10)
+      message = self.gat_p.match.group(1).strip()
+      message = [int(byte,16) for byte in message.split(b' ')]
+      hr, status = getHeartRate(message)
+      return hr
+
+    except pexcept.TIMEOUT:
+      print('connection lost to HR monitor, restarting connection')
+      self.gat_p.close()
+      self.connect()
+      return 0
+    except KeyboardInterrupt:
+      self.gat_p.close()
+      quit()
+
 
 
