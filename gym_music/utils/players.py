@@ -47,7 +47,8 @@ class MidiPlayer(Player):
 
   def _close_p(self):
     if self._p is not None:
-      self._p.terminate()
+      pass
+      #self._p.terminate()
 
 
   def isRunning(self):

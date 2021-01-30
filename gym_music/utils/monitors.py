@@ -29,13 +29,14 @@ class HeartMonitor(Monitor):
     self.gat_p = None
     self._handle = None
     self._uuid = None
-    self.connect()
+    #self.connect()
+    #print(self.read())
 
     self.rounds = 30
 
   def record(self):
     # Spawn Heartrate monitor process for the next K seconds
-    
+    self.connect()
     total = 0
     for i in range(self.rounds):
       try:
@@ -48,13 +49,6 @@ class HeartMonitor(Monitor):
 
     return total/self.rounds
 
-      
-
-    # Read the process value
-
-
-    return future
-
   def reset(self):
     self._close_p()
 
@@ -65,8 +59,8 @@ class HeartMonitor(Monitor):
     if self.gat_p is not None:
       self.gat_p.terminate()
  
-  def getHeartRate(message):
-
+  def getHeartRate(self,message):
+    
     hrFormatID = message[0] & 1
     sensorStatusID = message[0] & 6 
 
@@ -97,41 +91,56 @@ class HeartMonitor(Monitor):
       except KeyboardInterrupt:
         self.gat_p.close()
         quit()
-    print('connection successful, registering') 
-    
+    print('connection successful, registering monitor handles') 
+    self.register()
+
+  def register(self):
     self.gat_p.sendline('char-desc')
     registered = False
-    while not registered:
+    charWriteSet = False
+    while not (registered and charWriteSet):
       try:
         self.gat_p.expect( r'handle: (0x[0-9a-f]+), uuid: ([0-9a-f]{8})', timeout= 10)
-        registered = True
-      except pexcpect.TIMEOUT:
+      except pexpect.TIMEOUT:
           print('registration failed : retrying')
       except KeyboardInterrupt:
         self.gat_p.close()
         quit()
-      self._handle = self.gat_p.match.group(1).decode()
-      self._uuid = self.gat_p.match.group(2).decode()
-    print('registration successful')
-
-
+      
+      handle = self.gat_p.match.group(1).decode()
+      uuid = self.gat_p.match.group(2).decode()
+      
+      if uuid == '00002902' and registered:
+        self.charWriteHandle = handle
+        charWriteSet = True
+      
+      if uuid == '00002a37':
+        self._handle = handle
+        registered = True
+    self.gat_p.sendline('char-write-req '+self.charWriteHandle+' 0100')
+        
+    print('handle registration successful')
+  
   def read(self):
     try:
-      self.gat_p.expect('Notification handle = ' + self._handle + 'value: ([0-9a-f]+)', timeout = 10)
+      expect_message = 'Notification handle = '+self._handle+' value: ([0-9a-f ]+)'
+      #expect_message = '(.*)'
+      self.gat_p.expect(expect_message, timeout = 10)
+      #print(self.gat_p.match.group(1))
+      
       message = self.gat_p.match.group(1).strip()
       message = [int(byte,16) for byte in message.split(b' ')]
-      hr, status = getHeartRate(message)
+      hr, status = self.getHeartRate(message)
       return hr
 
-    except pexcept.TIMEOUT:
+    except pexpect.TIMEOUT:
       print('connection lost to HR monitor, restarting connection')
       self.gat_p.close()
       self.connect()
-      raise pexcept.TIMEOUT
+      raise pexpect.TIMEOUT
 
     except KeyboardInterrupt:
       self.gat_p.close()
       quit()
-
 
 
