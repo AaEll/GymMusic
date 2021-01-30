@@ -37,6 +37,7 @@ class HeartMonitor(Monitor):
     for i in range(self.rounds):
       try:
         total = total + self.read()
+        print('current hr : {}'.format(total/(i+1)))
       except pexpect.TIMEOUT:
         return total/(i+1) # IF timeout, just return current estimate
 
