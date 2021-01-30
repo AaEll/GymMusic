@@ -78,10 +78,10 @@ class HeartMonitor(Monitor):
 
     connected = False
     self.gat_p = pexpect.spawn('gatttool -b ' + self.macAddress+ ' -t random --interactive') 
-    self.gat_p.logfile = sys.stdout
 
     while not connected:
-      self.gat_p.expect(r'\[LE\}>')
+
+      self.gat_p.expect(r"\[LE\]>")
       self.gat_p.sendline('connect')
 
       try:
