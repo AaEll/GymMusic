@@ -77,7 +77,7 @@ class HeartMonitor(Monitor):
   def connect(self):
 
     connected = False
-    self.gat_p = pexpect.spawn('gattool -b ' + self.macAddress+ ' -t random --interactive') as gat_p
+    self.gat_p = pexpect.spawn('gattool -b ' + self.macAddress+ ' -t random --interactive') 
     self.gat_p.logfile = sys.stdout
 
     while not connected:

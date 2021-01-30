@@ -1,5 +1,5 @@
 import subprocess
-from .monitor import Monitor
+from .monitors import Monitor
 
 class Player():
   def __init__(self):
