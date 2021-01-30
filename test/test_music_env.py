@@ -1,5 +1,6 @@
 
 from gym_music.envs.music_env import MusicEnv
+from gym_music.utils.monitors import HeartMonitor
 from gym.spaces import Discrete
 import numpy as np
 
@@ -23,8 +24,8 @@ if __name__ == "__main__":
       actions.append(action)
 
 
-  
-  with MusicEnv() as env:
+    
+  with MusicEnv(monitor = HeartMonitor('DC:39:39:66:26:1F')) as env:
 
     agent = RandomAgent(Discrete(len(actions)))
 
