@@ -1,5 +1,6 @@
 import pexpect
 import sys
+import time
 
 class Monitor():
   def __init__(self):
@@ -20,22 +21,33 @@ class HeartMonitor(Monitor):
   def __init__(self, macAddress):
     super().__init__()
 
-    self._p = None
-
     self.macAddress = macAddress
     self._handle = None
     self._uuid = None
 
-
     # initialize HR monitor 
+    self.connect()
+
+    self.rounds = 30
 
   def record(self):
     # Spawn Heartrate monitor process for the next K seconds
-    self._p = TODO
+    
+    total = 0
+    for i in range(self.rounds):
+      try:
+        total = total + self.read()
+      except pexpect.TIMEOUT:
+        return total/(i+1) # IF timeout, just return current estimate
+
+      time.sleep(1)
+
+    return total/self.rounds
+
+      
 
     # Read the process value
 
-    future = self._p.TODO
 
     return future
 
@@ -55,13 +67,13 @@ class HeartMonitor(Monitor):
     sensorStatusID = message[0] & 6 
 
     if hrFormatID == 0:
-        hr = message[1]
+      hr = message[1]
     elif hrFormatID == 1:
-        hr = (message[2] << 8) | message[1]
+      hr = (message[2] << 8) | message[1]
 
     return hr, sensorStatusID
 
-  def connect():
+  def connect(self):
 
     connected = False
     self.gat_p = pexpect.spawn('gattool -b ' + self.macAddress+ ' -t random --interactive') as gat_p
@@ -88,6 +100,7 @@ class HeartMonitor(Monitor):
     while not registered:
       try:
         self.gat_p.expect( r'handle: (0x[0-9a-f]+), uuid: ([0-9a-f]{8})', timeout= 10)
+        registered = True
       except pexcpect.TIMEOUT:
           print('registration failed : retrying')
       except KeyboardInterrupt:
@@ -98,7 +111,7 @@ class HeartMonitor(Monitor):
     print('registration successful')
 
 
-  def read_hr():
+  def read(self):
     try:
       self.gat_p.expect('Notification handle = ' + self._handle + 'value: ([0-9a-f]+)', timeout = 10)
       message = self.gat_p.match.group(1).strip()
@@ -110,7 +123,8 @@ class HeartMonitor(Monitor):
       print('connection lost to HR monitor, restarting connection')
       self.gat_p.close()
       self.connect()
-      return 0
+      raise pexcept.TIMEOUT
+
     except KeyboardInterrupt:
       self.gat_p.close()
       quit()
