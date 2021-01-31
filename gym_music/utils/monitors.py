@@ -6,9 +6,12 @@ class Monitor():
   def __init__(self):
     pass
 
-  def record(self):
+  def read(self):
     return 0
 
+  def connect(self):
+    pass
+  
   def reset(self):
     pass
  
@@ -34,20 +37,27 @@ class HeartMonitor(Monitor):
 
     self.rounds = 30
 
-  def record(self):
-    # Spawn Heartrate monitor process for the next K seconds
-    self.connect()
-    total = 0
-    for i in range(self.rounds):
-      try:
-        total = total + self.read()
-        print('current hr : {}'.format(total/(i+1)))
-      except pexpect.TIMEOUT:
-        return total/(i+1) # IF timeout, just return current estimate
+  def read(self):
+    try:
+      expect_message = 'Notification handle = '+self._handle+' value: ([0-9a-f ]+)'
+      #expect_message = '(.*)'
+      self.gat_p.expect(expect_message, timeout = 10)
+      #print(self.gat_p.match.group(1))
 
-      time.sleep(1)
+      message = self.gat_p.match.group(1).strip()
+      message = [int(byte,16) for byte in message.split(b' ')]
+      hr, status = self.getHeartRate(message)
+      return hr
 
-    return total/self.rounds
+    except pexpect.TIMEOUT:
+      print('connection lost to HR monitor, restarting connection')
+      self.gat_p.close()
+      self.connect()
+      raise pexpect.TIMEOUT
+
+    except KeyboardInterrupt:
+      self.gat_p.close()
+      quit()
 
   def reset(self):
     self._close_p()
@@ -57,7 +67,8 @@ class HeartMonitor(Monitor):
 
   def _close_p(self):
     if self.gat_p is not None:
-      self.gat_p.terminate()
+      
+      self.gat_p.close()
  
   def getHeartRate(self,message):
     
@@ -121,26 +132,5 @@ class HeartMonitor(Monitor):
         
     print('handle registration successful')
   
-  def read(self):
-    try:
-      expect_message = 'Notification handle = '+self._handle+' value: ([0-9a-f ]+)'
-      #expect_message = '(.*)'
-      self.gat_p.expect(expect_message, timeout = 10)
-      #print(self.gat_p.match.group(1))
-      
-      message = self.gat_p.match.group(1).strip()
-      message = [int(byte,16) for byte in message.split(b' ')]
-      hr, status = self.getHeartRate(message)
-      return hr
-
-    except pexpect.TIMEOUT:
-      print('connection lost to HR monitor, restarting connection')
-      self.gat_p.close()
-      self.connect()
-      raise pexpect.TIMEOUT
-
-    except KeyboardInterrupt:
-      self.gat_p.close()
-      quit()
 
 

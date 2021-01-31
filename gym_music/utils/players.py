@@ -1,5 +1,6 @@
 import subprocess
 from .monitors import Monitor
+import time
 
 class Player():
   def __init__(self):
@@ -20,22 +21,27 @@ class MidiPlayer(Player):
     super().__init__()
     self.soundfont = '/usr/share/sounds/sf2/FluidR3_GM.sf2'
     self.samplerate = '44100'
-    
+    self.steps = 15
     # initialize monitor
     self.monitor = Monitor() if monitor is None else monitor
 
     # initialize player_process to None
     self._p = None
 
-  def _play_midi(self,content_path):
-    self._p = subprocess.call(['fluidsynth', '-i','-a','pulseaudio', self.soundfont, content_path,'-r',self.samplerate],shell=False)
 
   def queue(self,content_path):
-    self._play_midi(content_path)
     
-    observation = self.monitor.record()
+    self.monitor.connect()
+    self._p = subprocess.Popen(['fluidsynth', '-i','-a','pulseaudio', self.soundfont, content_path,'-r',self.samplerate])
+    total = 0
+    for i in range(self.steps):
+      total = total + self.monitor.read()
+      time.sleep(1)
 
-    return observation
+    if self.isRunning():
+      self._p.wait()
+
+    return total/(self.steps)
 
   def reset(self):
     self._close_p()
@@ -46,9 +52,9 @@ class MidiPlayer(Player):
     self.monitor.close()
 
   def _close_p(self):
-    if self._p is not None:
-      pass
-      #self._p.terminate()
+    if self.isRunning():
+      # TODO wrap terminate() call in try: catch (error if _p has already finished): pass
+      self._p.terminate()
 
 
   def isRunning(self):
