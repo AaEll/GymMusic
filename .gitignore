@@ -1,5 +1,5 @@
 build/
 dist/
-output/
+output/*
 gym_music.egg-info/
 __pycache__/
