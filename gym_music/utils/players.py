@@ -30,7 +30,7 @@ class MidiPlayer(Player):
 
 
   def queue(self,content_path):
-    pass if self.monitor.isConnected() else self.monitor.connect()
+    0 if self.monitor.isConnected() else self.monitor.connect()
 
     self._p = subprocess.Popen(['fluidsynth', '-i','-a','pulseaudio', self.soundfont, content_path,'-r',self.samplerate])
     total = 0

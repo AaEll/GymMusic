@@ -2,13 +2,31 @@ from . import midi_utils
 import numpy as np 
 import random 
 
-class MidiBuilder():
+class Builder():
+  def __init__(self):
+    pass
+  def append(self, next_action):
+    pass
+
+  def build(self, output_path = None):
+    return output_path
+  
+  def close(self):
+    pass
+
+  def reset(self):
+    pass
+
+
+
+class MidiBuilder(Builder):
   """
   Builder pattern for midi files from repeated
   appends of token indices
   """
 
   def __init__(self,builder_idx = None):
+    super().__init__()
     self.proto_sequence = []
     if builder_idx is None:
         self.builder_idx = random.randint(0,1000)
