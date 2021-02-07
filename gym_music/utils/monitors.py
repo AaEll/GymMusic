@@ -132,5 +132,11 @@ class HeartMonitor(Monitor):
         
     print('handle registration successful')
   
+  def isConnected(self):
+    try:
+      self.read()
+      return True
 
+    except:
+      return False
 
