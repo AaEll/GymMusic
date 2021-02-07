@@ -48,8 +48,8 @@ class MidiBuilder(Builder):
   def build(self, midi_path = None):
     if midi_path is None:
         midi_path = "./output/midi_{}_{}.mid".format(self.builder_idx, self.midi_idx)
-    cat_sequence = np.concatenate(self.proto_sequence,axis = 0)
-    midi_utils.event_indices_to_midi_file(cat_sequence, midi_path)
+    proto_sequence = np.array(self.proto_sequence, dtype = 'int64')
+    midi_utils.event_indices_to_midi_file(proto_sequence, midi_path)
     self.midi_idx = self.midi_idx + 1
     
     return midi_path
