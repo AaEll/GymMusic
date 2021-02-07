@@ -2,6 +2,7 @@ import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 import asyncio
+import numpy as np
 
 from ..utils.builders import MidiBuilder
 from ..utils.players import MidiPlayer
@@ -21,8 +22,8 @@ class MusicEnv(gym.Env):
     super().__init__()
 
     self.action_space = spaces.Box(0, 256, shape=(self.model['event_dim'],)) 
-    self.observation_space = spaces.Discrete(1) # MultiDiscrete([2]*self.model['init_dim'])
-    
+    self.observation_space = spaces.Box(0,1,shape = (1,)) #Discrete(1) # MultiDiscrete([2]*self.model['init_dim'])
+    self.default_dtype = 'float32'
     # define Midi utility objects
 
     self.builder = MidiBuilder() if builder is None else builder
@@ -32,9 +33,7 @@ class MusicEnv(gym.Env):
     self._proto_rounds = 0
     self.max_proto_rounds = max_rounds
 
-
   def step(self, action):
-
     self._proto_rounds = self._proto_rounds + 1
 
     if self._is_stop_action(action):
@@ -43,26 +42,32 @@ class MusicEnv(gym.Env):
       reward = self.player.queue(midi_file_path)
       reward = reward.result() if asyncio.isfuture(reward) else reward 
       obs = 0
-      done = 1
+      done = True
 
     else:
       self.builder.append(action)
       reward = 0
       obs = 0
-      done = 0
+      done = False
 
-    return obs,reward,done, {}
+    return (np.array((obs,),dtype = self.default_dtype),
+            np.array(reward, dtype = self.default_dtype),
+            done,
+            {},
+           )
 
   def reset(self):
     self._proto_rounds = 0
     self.builder.reset()
     self.player.reset()
-    
+    initial_obs = np.array((0,),dtype = self.default_dtype)
+    return initial_obs
   
   def render(self, mode='human',):
     pass
 
   def close(self):
+
     self.builder.close()
     self.player.close()
     
