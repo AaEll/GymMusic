@@ -24,13 +24,15 @@ class MidiPlayer(Player):
     self.steps = 15
     # initialize monitor
     self.monitor = Monitor() if monitor is None else monitor
-
+    self._connected = False
     # initialize player_process to None
     self._p = None
 
 
   def queue(self,content_path):
-    0 if self.monitor.isConnected() else self.monitor.connect()
+    if not self._connected:
+      self.monitor.connect()
+      self._connected = True
 
     self._p = subprocess.Popen(['fluidsynth', '-i','-a','pulseaudio', self.soundfont, content_path,'-r',self.samplerate])
     total = 0
