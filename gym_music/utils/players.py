@@ -21,7 +21,7 @@ class MidiPlayer(Player):
     super().__init__()
     self.soundfont = '/usr/share/sounds/sf2/FluidR3_GM.sf2'
     self.samplerate = '44100'
-    self.steps = 15
+    self.steps = 30
     # initialize monitor
     self.monitor = Monitor() if monitor is None else monitor
     self._connected = False
