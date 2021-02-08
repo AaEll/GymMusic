@@ -25,17 +25,12 @@ class HeartMonitor(Monitor):
     super().__init__()
 
     self.macAddress = macAddress
-    self._handle = None
-    self._uuid = None
 
     # initialize HR monitor 
     self.gat_p = None
     self._handle = None
     self._uuid = None
-    #self.connect()
-    #print(self.read())
 
-    self.rounds = 30
 
   def read(self):
     try:
@@ -60,7 +55,8 @@ class HeartMonitor(Monitor):
       quit()
 
   def reset(self):
-    self._close_p()
+    pass
+    #self._close_p()
 
   def close(self):
     self._close_p()
@@ -133,10 +129,9 @@ class HeartMonitor(Monitor):
     print('handle registration successful')
   
   def isConnected(self):
-    try:
-      self.read()
-      return True
+    expect_message = 'Notification handle = '+self._handle+' value: ([0-9a-f ]+)' 
+    self.gat_p.expect(expect_message, timeout = 10) 
+    message = self.gat_p.match.group(1).strip()
 
-    except:
-      return False
+    return message is not None
 
