@@ -38,7 +38,7 @@ class MidiPlayer(Player):
       obs = self.monitor.read()
       total = total + obs
       time.sleep(1)
-    feedback = total/self.steps
+    feedback = -total/self.steps
 
     if self.isRunning():
       self._p.wait()
@@ -62,6 +62,6 @@ class MidiPlayer(Player):
 
 
   def isRunning(self):
-    return (False if self._p is None else (self_p.poll is None))
+    return (False if self._p is None else (self._p.poll is None))
 
 
