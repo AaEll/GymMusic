@@ -39,7 +39,7 @@ class MidiBuilder(Builder):
     self.proto_sequence.append(next_proto)
     
   def reset(self):
-    self.token_sequence = []
+    self.proto_sequence = []
     self.midi_idx = 0
 
   def close(self):
