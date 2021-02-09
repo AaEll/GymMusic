@@ -1,2 +1,6 @@
 gym==0.18.0
-pygame
+asyncio
+pexpect
+logging
+numpy
+pretty_midi
