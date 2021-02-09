@@ -18,7 +18,7 @@ class MusicEnv(gym.Env):
     'control_dim': ControlSeq.dim(),
   }
 
-  def __init__(self, max_rounds = 30, builder = None, player = None, monitor = None):
+  def __init__(self, max_rounds = 30, builder = None, player = None, monitor = None, logger = None):
     super().__init__()
 
     self.action_space = spaces.Box(-np.inf,np.inf, shape=(self.model['event_dim'],)) 
@@ -28,6 +28,7 @@ class MusicEnv(gym.Env):
 
     self.builder = MidiBuilder() if builder is None else builder
     self.player = MidiPlayer(monitor = monitor) if player is None else player
+    self.logger = logger
 
     # stop condition number of rounds
     self._proto_rounds = 0
@@ -44,6 +45,9 @@ class MusicEnv(gym.Env):
       reward = reward.result() if asyncio.isfuture(reward) else reward 
       obs = 0
       done = True
+
+      if logger:
+        logger.log(str(builder)+'|'+ str(reward))
 
     else:
       self.builder.append(note)

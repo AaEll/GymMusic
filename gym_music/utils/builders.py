@@ -54,6 +54,9 @@ class MidiBuilder(Builder):
     
     return midi_path
 
+    def __str__(self):
+      return "proto|"+str(self.proto_sequence)
+
 
 
 
