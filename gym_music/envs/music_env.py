@@ -47,7 +47,7 @@ class MusicEnv(gym.Env):
       obs = 0
       done = True
 
-      if verbose:
+      if self.verbose:
         logging.info(str(builder)+'|'+ str(reward))
 
     else:
