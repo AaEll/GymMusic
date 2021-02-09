@@ -1,6 +1,7 @@
 import subprocess
 from .monitors import Monitor
 import time
+from copy import deepcopy
 
 class Player():
   def __init__(self):
@@ -24,15 +25,14 @@ class MidiPlayer(Player):
     self.steps = 30
     # initialize monitor
     self.monitor = Monitor() if monitor is None else monitor
-    self._connected = False
+
     # initialize player_process to None
     self._p = None
 
 
   def queue(self,content_path):
-    if not self._connected:
+    if not self.monitor.connected:
       self.monitor.connect()
-      self._connected = True
 
     self._p = subprocess.Popen(['fluidsynth', '-i','-a','pulseaudio', self.soundfont, content_path,'-r',self.samplerate])
     total = 0
@@ -61,9 +61,33 @@ class MidiPlayer(Player):
     if self.isRunning():
       # TODO wrap terminate() call in try: catch (error if _p has already finished): pass
       self._p.terminate()
-
+    self._p = None
 
   def isRunning(self):
     return (False if self._p is None else (self._p.poll is None))
+  
+  def __getstate__(self):
+    state = self.__dict__.copy()
+    state['_p'] = None
+    return state
+  """
+  def __deepcopy__(self, memo):
+    # remove unwanted child temporarily
+    _p = self._p
+    self._p = None
+    
+    deepcopy_method = self.__deepcopy__
 
+    self.__deepcopy__ = None # this line needed for deepcopy to have normal behavior
+    cp = deepcopy(self, memo)
 
+    # undo self.__deepcopy__ = None
+    self.__deepcopy__ = deepcopy_method
+    cp.__deepcopy__ = deepcopy_method
+    
+    # return unwanted child
+    self._p = _p
+
+    return cp
+
+  """

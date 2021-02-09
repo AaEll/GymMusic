@@ -5,7 +5,6 @@ import time
 class Monitor():
   def __init__(self):
     pass
-
   def read(self):
     return 0
 
@@ -20,6 +19,7 @@ class Monitor():
 
 
 
+
 class HeartMonitor(Monitor):
   def __init__(self, macAddress):
     super().__init__()
@@ -30,6 +30,7 @@ class HeartMonitor(Monitor):
     self.gat_p = None
     self._handle = None
     self._uuid = None
+    self._connected = False
 
 
   def read(self):
@@ -62,9 +63,10 @@ class HeartMonitor(Monitor):
     self._close_p()
 
   def _close_p(self):
-    if self.gat_p is not None:
-      
+    if self.gat_p: 
       self.gat_p.close()
+      self.gat_p = None
+    self._connected = False
  
   def getHeartRate(self,message):
     
@@ -98,6 +100,7 @@ class HeartMonitor(Monitor):
       except KeyboardInterrupt:
         self.gat_p.close()
         quit()
+    self._connected = True
     print('connection successful, registering monitor handles') 
     self.register()
 
@@ -128,10 +131,35 @@ class HeartMonitor(Monitor):
         
     print('handle registration successful')
   
-  def isConnected(self):
-    expect_message = 'Notification handle = '+self._handle+' value: ([0-9a-f ]+)' 
-    self.gat_p.expect(expect_message, timeout = 10) 
-    message = self.gat_p.match.group(1).strip()
+  @property
+  def connected(self):
+    #if self.gat_p:
+    #  expect_message = 'Notification handle = '+self._handle+' value: ([0-9a-f ]+)' 
+    #  self.gat_p.expect(expect_message, timeout = 10) 
+    #  message = self.gat_p.match.group(1).strip()
+    #  return message is not None
+    #else:
+    #  return False
+    return self._connected
+  def __getstate__(self):
+    state = self.__dict__.copy()
+    state['gat_p'] = None
+    state['_connected']= False
 
-    return message is not None
+    return state
+  """
+  def __deepcopy__(self, memo):
+    gat_p = self.gat_p
+    self.gat_p = None
 
+    deepcopy_method = self.__deepcopy__
+    self.__deepcopy__ = None # this line needed for deepcopy to have normal behavior
+    cp = deepcopy(self, memo)
+    # undo self.__deepcopy__ = None
+    self.__deepcopy__ = deepcopy_method
+    cp.__deepcopy__ = deepcopy_method
+
+    self.gat_p = gat_p
+    cp._connected = False
+    return cp
+"""
