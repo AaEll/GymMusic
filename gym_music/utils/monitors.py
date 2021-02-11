@@ -36,24 +36,22 @@ class HeartMonitor(Monitor):
   def read(self):
     try:
       expect_message = 'Notification handle = '+self._handle+' value: ([0-9a-f ]+)'
-      #expect_message = '(.*)'
       self.gat_p.expect(expect_message, timeout = 10)
-      #print(self.gat_p.match.group(1))
 
       message = self.gat_p.match.group(1).strip()
       message = [int(byte,16) for byte in message.split(b' ')]
+      if len(message) < 2:
+        raise ValueError('Received malformed heartrate message')
       hr, status = self.getHeartRate(message)
       return hr
 
-    except pexpect.TIMEOUT:
-      print('connection lost to HR monitor, restarting connection')
-      self.gat_p.close()
-      self.connect()
-      raise pexpect.TIMEOUT
+    except (pexpect.TIMEOUT, ValueError ) as e:
+      self._close_p()
+      raise ValueError('Lost connection to HR Monitor')
 
     except KeyboardInterrupt:
       self.gat_p.close()
-      quit()
+      raise KeyboardInterrupt()
 
   def reset(self):
     pass
@@ -99,7 +97,7 @@ class HeartMonitor(Monitor):
         print('connection failed : retrying')
       except KeyboardInterrupt:
         self.gat_p.close()
-        quit()
+        raise KeyboardInterrupt()
     self._connected = True
     print('connection successful, registering monitor handles') 
     self.register()
@@ -115,7 +113,7 @@ class HeartMonitor(Monitor):
           print('registration failed : retrying')
       except KeyboardInterrupt:
         self.gat_p.close()
-        quit()
+        raise KeyboardInterrupt()
       
       handle = self.gat_p.match.group(1).decode()
       uuid = self.gat_p.match.group(2).decode()
@@ -133,20 +131,15 @@ class HeartMonitor(Monitor):
   
   @property
   def connected(self):
-    #if self.gat_p:
-    #  expect_message = 'Notification handle = '+self._handle+' value: ([0-9a-f ]+)' 
-    #  self.gat_p.expect(expect_message, timeout = 10) 
-    #  message = self.gat_p.match.group(1).strip()
-    #  return message is not None
-    #else:
-    #  return False
     return self._connected
+
   def __getstate__(self):
     state = self.__dict__.copy()
     state['gat_p'] = None
     state['_connected']= False
 
     return state
+
   """
   def __deepcopy__(self, memo):
     gat_p = self.gat_p

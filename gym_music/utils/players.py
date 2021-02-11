@@ -2,6 +2,7 @@ import subprocess
 from .monitors import Monitor
 import time
 from copy import deepcopy
+import logging
 
 class Player():
   def __init__(self):
@@ -37,7 +38,12 @@ class MidiPlayer(Player):
     self._p = subprocess.Popen(['fluidsynth', '-i','-a','pulseaudio', self.soundfont, content_path,'-r',self.samplerate])
     total = 0
     for i in range(self.steps):
-      obs = self.monitor.read()
+      try:
+        obs = self.monitor.read()
+      except ValueError as e:
+        logging.warning('monitor connection lost: retrying')
+        self._close_p()
+        return self.queue(content_path)
       total = total + obs
       time.sleep(1)
     feedback = -total/self.steps
@@ -45,8 +51,6 @@ class MidiPlayer(Player):
     if self.isRunning():
       self._p.wait()
     
-    with open(content_path+'.feedback', 'w') as f:
-      f.write('hr\n{}'.format(feedback))
     return feedback
 
   def reset(self):
