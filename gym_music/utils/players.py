@@ -19,11 +19,11 @@ class Player():
     pass
 
 class MidiPlayer(Player):
-  def __init__(self, monitor = None):
+  def __init__(self, monitor = None, steps = 30):
     super().__init__()
     self.soundfont = '/usr/share/sounds/sf2/FluidR3_GM.sf2'
     self.samplerate = '44100'
-    self.steps = 30
+    self.steps = steps
     # initialize monitor
     self.monitor = Monitor() if monitor is None else monitor
 
