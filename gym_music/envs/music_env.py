@@ -28,7 +28,6 @@ class MusicEnv(gym.Env):
 
     self.builder = MidiBuilder() if builder is None else builder
     self.player = MidiPlayer(monitor = monitor) if player is None else player
-    self.verbose = verbose
 
     # stop condition number of rounds
     self._proto_rounds = 0
