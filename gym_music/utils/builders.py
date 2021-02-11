@@ -40,7 +40,6 @@ class MidiBuilder(Builder):
     
   def reset(self):
     self.proto_sequence = []
-    self.midi_idx = 0
 
   def close(self):
     pass
