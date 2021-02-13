@@ -3,6 +3,7 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 import asyncio
 import numpy as np
+from scipy.special import softmax
 
 from ..utils.builders import MidiBuilder
 from ..utils.players import MidiPlayer
@@ -32,6 +33,7 @@ class MusicEnv(gym.Env):
     # stop condition number of rounds
     self._proto_rounds = 0
     self.max_proto_rounds = max_rounds
+    self._max_episode_steps = max(max_rounds,1)
 
   def step(self, action):
     self._proto_rounds = self._proto_rounds + 1
@@ -49,7 +51,7 @@ class MusicEnv(gym.Env):
     else:
       self.builder.append(note)
       reward = 0
-      obs = 0
+      obs = 1
       done = False
 
     return (np.array((obs,),dtype = self.default_dtype),
@@ -78,6 +80,13 @@ class MusicEnv(gym.Env):
     return self._proto_rounds >= self.max_proto_rounds
    
 
-  def _sample_event(self, output):
-    return output.argmax(-1)
+  def _sample_event(self, output, mode = 'softmax_sample'):
 
+    if mode == 'softmax_sample':
+      return np.random.choice(len(output), p = softmax(output))
+
+    if mode == 'argmax':
+      return output.argmax(-1)
+    
+    else:
+      raise ValueError('unsupported mode : {mode}'.format(mode = mode)) 
