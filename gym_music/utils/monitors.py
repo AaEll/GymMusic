@@ -17,6 +17,10 @@ class Monitor():
   def close(self):
     pass
 
+  @property
+  def connected(self):
+    return True
+
 
 
 
