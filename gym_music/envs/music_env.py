@@ -1,6 +1,5 @@
-import gym
-from gym import error, spaces, utils
-from gym.utils import seeding
+from gym import Env
+import akro
 import asyncio
 import numpy as np
 from scipy.special import softmax
@@ -9,7 +8,7 @@ from ..utils.builders import MidiBuilder
 from ..utils.players import MidiPlayer
 from ..utils.sequence import EventSeq, ControlSeq
 
-class MusicEnv(gym.Env):
+class MusicEnv(Env):
   metadata = {'render.modes': ['human']}
   name = 'Music-Env'
 
@@ -22,9 +21,9 @@ class MusicEnv(gym.Env):
   def __init__(self, max_rounds = 30, builder = None, player = None, monitor = None):
     super().__init__()
 
-    self.action_space = spaces.Box(-np.inf,np.inf, shape=(self.model['event_dim'],)) 
-    self.observation_space = spaces.Box(0,1,shape = (1,)) #Discrete(1) # MultiDiscrete([2]*self.model['init_dim'])
-    self.default_dtype = 'float32'
+    self.action_space = akro.Discrete(self.model['event_dim'])
+    self.observation_space = akro.Discrete(2)
+    self.default_dtype = 'int32'
     # define Midi utility objects
 
     self.builder = MidiBuilder() if builder is None else builder
@@ -37,7 +36,7 @@ class MusicEnv(gym.Env):
 
   def step(self, action):
     self._proto_rounds = self._proto_rounds + 1
-    note = self._sample_event(action)
+    note = action+1
     if self._is_stop_action(action):
       self.builder.append(note)
       midi_file_path = self.builder.build()
@@ -79,14 +78,3 @@ class MusicEnv(gym.Env):
   def _is_stop_action(self,action):
     return self._proto_rounds >= self.max_proto_rounds
    
-
-  def _sample_event(self, output, mode = 'softmax_sample'):
-
-    if mode == 'softmax_sample':
-      return np.random.choice(len(output), p = softmax(output))
-
-    if mode == 'argmax':
-      return output.argmax(-1)
-    
-    else:
-      raise ValueError('unsupported mode : {mode}'.format(mode = mode)) 
