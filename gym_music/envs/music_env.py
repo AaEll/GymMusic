@@ -22,8 +22,8 @@ class MusicEnv(Env):
     super().__init__()
 
     self.action_space = akro.Discrete(self.model['event_dim'])
-    self.observation_space = akro.Discrete(2)
-    self.default_dtype = 'int32'
+    self.observation_space = akro.Box(0.0,1.0,(1,))
+    self.default_dtype = 'float32'
     # define Midi utility objects
 
     self.builder = MidiBuilder() if builder is None else builder

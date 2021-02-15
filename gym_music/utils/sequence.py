@@ -185,10 +185,10 @@ class EventSeq:
         return EventSeq(events)
 
     @staticmethod
-    def from_array(event_indeces):
+    def from_array(event_indices):
         time = 0
         events = []
-        for event_index in event_indeces:
+        for event_index in event_indices:
             for event_type, feat_range in EventSeq.feat_ranges().items():
                 if feat_range.start <= event_index < feat_range.stop:
                     event_value = event_index - feat_range.start
@@ -196,7 +196,6 @@ class EventSeq:
                     if event_type == 'time_shift':
                         time += EventSeq.time_shift_bins[event_value]
                     break
-
         return EventSeq(events)
 
     @staticmethod
