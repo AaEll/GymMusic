@@ -1,6 +1,6 @@
 
 from gym_music.envs.music_env import MusicEnv
-from gym_music.utils.monitors import HeartMonitor
+from gym_music.utils.monitors import Monitor
 from gym.spaces import Discrete
 import numpy as np
 
@@ -17,25 +17,16 @@ if __name__ == "__main__":
   
   actions = []
   
-  with open('test/utils/example_actions.txt','r') as f:
-    for line in f.readlines():
-      line = line.strip('][\n')
-      action = np.array([int(s) for s in line.split(',')])
-      actions.append(action)
+  with MusicEnv(monitor = Monitor()) as env:
 
-
-    
-  with MusicEnv(monitor = HeartMonitor('DC:39:39:66:26:1F')) as env:
-
-    agent = RandomAgent(Discrete(len(actions)))
+    agent = RandomAgent(env.action_space)
 
     for i in range(3):
-      env.reset()
-      obs,reward,done = (0,0,0)
+      obs = env.reset()
+      reward,done = (0,0)
       
       while True:
-        action_idx = agent.act(obs, reward, done)
-        action = actions[action_idx]
+        action = agent.act(obs, reward, done)
         obs, reward, done, _ = env.step(action)
         if done:
           break
