@@ -32,8 +32,12 @@ class MidiPlayer(Player):
 
 
   def queue(self,content_path):
-    if not self.monitor.connected:
-      self.monitor.connect()
+    while not self.monitor.connected:
+      try:
+        self.monitor.connect()
+      except ValueError as e:
+        print('caught error while connecting retrying')
+
 
     self._p = subprocess.Popen(['fluidsynth', '-i','-a','pulseaudio', self.soundfont, content_path,'-r',self.samplerate])
     total = 0

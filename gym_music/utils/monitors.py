@@ -59,7 +59,6 @@ class HeartMonitor(Monitor):
 
   def reset(self):
     pass
-    #self._close_p()
 
   def close(self):
     self._close_p()
@@ -111,16 +110,23 @@ class HeartMonitor(Monitor):
     registered = False
     charWriteSet = False
     while not (registered and charWriteSet):
-      try:
-        self.gat_p.expect( r'handle: (0x[0-9a-f]+), uuid: ([0-9a-f]{8})', timeout= 10)
-      except pexpect.TIMEOUT:
-          print('registration failed : retrying')
-      except KeyboardInterrupt:
-        self.gat_p.close()
-        raise KeyboardInterrupt()
+      handle = None
+      uuid = None
       
-      handle = self.gat_p.match.group(1).decode()
-      uuid = self.gat_p.match.group(2).decode()
+      try:
+        self.gat_p.expect( r'handle: (0x[0-9a-f]+), uuid: ([0-9a-f]{8})', timeout= 20)
+        handle = self.gat_p.match.group(1).decode()
+        uuid = self.gat_p.match.group(2).decode()
+      except (pexpect.TIMEOUT,AttributeError) as e:
+        print('registration failed {}: retrying'.format(e))
+        handle = None
+        uuid = None
+      except pexpect.exceptions.EOF:
+        self.close()
+        raise ValueError("gatttool failure")
+      except KeyboardInterrupt:
+        self.close()
+        raise KeyboardInterrupt()
       
       if uuid == '00002902' and registered:
         self.charWriteHandle = handle

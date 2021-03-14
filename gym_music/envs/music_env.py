@@ -22,8 +22,8 @@ class MusicEnv(Env):
     super().__init__()
 
     self.action_space = akro.Discrete(self.model['event_dim'])
-    self.observation_space = akro.Box(0.0,1.0,(1,))
-    self.default_dtype = 'float32'
+    self.observation_space = akro.Box(low=-np.inf, high=np.inf,shape = (self.model['event_dim'],))
+    
     # define Midi utility objects
 
     self.builder = MidiBuilder() if builder is None else builder
@@ -40,21 +40,20 @@ class MusicEnv(Env):
     if self._is_stop_action(action):
       self.builder.append(note)
       midi_file_path = self.builder.build()
-
       reward = self.player.queue(midi_file_path)
       reward = reward.result() if asyncio.isfuture(reward) else reward 
-      obs = 0
       done = True
-
 
     else:
       self.builder.append(note)
       reward = 0
-      obs = 1
       done = False
+    
+    obs = np.zeros((self.model['event_dim'],), dtype = np.float32)
+    obs[action] = 1
 
-    return (np.array((obs,),dtype = self.default_dtype),
-            np.array(reward, dtype = self.default_dtype),
+    return (obs,
+            np.array(reward, dtype = np.float32),
             done,
             {},
            )
@@ -63,7 +62,7 @@ class MusicEnv(Env):
     self._proto_rounds = 0
     self.builder.reset()
     self.player.reset()
-    initial_obs = np.array((0,),dtype = self.default_dtype)
+    initial_obs = np.zeros((self.model['event_dim'],), dtype = np.float32)  #np.array((0,),dtype = self.default_dtype)
     return initial_obs
   
   def render(self, mode='human',):
